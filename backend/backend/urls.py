@@ -2,7 +2,7 @@
 URL configuration for backend project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.1/topics/http/urls/
+    https://docs.djangoproject.com/en/6.0/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -15,15 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-...
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('web.urls')),
+    path('', include('web.urls')),
 ]
+
 
 # 仅限开发阶段使用。生产阶段需要在nginx里配置。
 if settings.DEBUG:
