@@ -1,17 +1,2 @@
-html {
-  font-family: Arial, sans-serif;
-  line-height: 1.5;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  padding: 2rem;
-  background: #f6f7fb;
-  color: #1f2937;
-}
-
-a {
-  color: #2563eb;
-}
+@import "tailwindcss";
+@plugin "daisyui";

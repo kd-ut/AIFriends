@@ -1,11 +1,12 @@
-<script setup></script>
+<script setup>
+import NavBar from "@/components/navbar/NavBar.vue";
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <NavBar>
+    页面内容
+  </NavBar>
+
 </template>
 
 <style scoped></style>
