@@ -12,6 +12,8 @@ const hasCharacters = ref(true)
 const sentinelRef = useTemplateRef('sentinel-ref')
 const route = useRoute()
 
+
+
 function checkSentinelVisible() {  // 判断哨兵是否能被看到
   if (!sentinelRef.value) return false
 

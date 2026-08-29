@@ -15,3 +15,34 @@ class Friend(models.Model):
     def __str__(self):
         return f"{self.character.name} - {self.me.user.username} - {localtime(self.create_time).strftime('%Y-%m-%d %H:%M:%S')}"
 
+
+class Message(models.Model):
+    friend = models.ForeignKey(Friend, on_delete=models.CASCADE)
+    user_message = models.TextField(max_length=500)
+    input = models.TextField(max_length=10000)
+    output = models.TextField(max_length=500)
+    input_tokens = models.IntegerField(default=0)
+    output_tokens = models.IntegerField(default=0)
+    total_tokens = models.IntegerField(default=0)
+    create_time = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return (
+            f"{self.friend.character.name} - {self.friend.me.user.username} - "
+            f"{self.user_message[:50]} - "
+            f"{localtime(self.create_time).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+
+
+class SystemPrompt(models.Model):
+    title = models.CharField(max_length=100)
+    order_number = models.IntegerField(default=0)
+    prompt = models.TextField(max_length=10000)
+    create_time = models.DateTimeField(default=now)
+    update_time = models.DateTimeField(default=now)
+
+    def __str__(self):
+        return (
+            f"{self.title} - {self.order_number} - {self.prompt[:50]} - "
+            f"{localtime(self.create_time).strftime('%Y-%m-%d %H:%M:%S')}"
+        )
