@@ -38,13 +38,18 @@ function handlePushFrontMessage(message) {
   history.value.unshift(message)
 }
 
+function handleClose() {
+  modalRef.value.close()
+  inputRef.value?.close()
+}
+
 defineExpose({showModal})
 </script>
 
 <template>
   <dialog ref="modal-ref" class="modal">
     <div class="modal-box w-90 h-150" :style="modalStyle">
-      <button @click="modalRef.close()" class="btn btn-sm btn-circle btn-ghost bg-transparent absolute right-1 top-1">✕</button>
+      <button @click="handleClose" class="btn btn-sm btn-circle btn-ghost bg-transparent absolute right-1 top-1">✕</button>
       <ChatHistory
           ref="chat-history-ref"
           v-if="friend"

@@ -11,12 +11,16 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import mimetypes
 
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
+
+# Windows 默认可能把 .mjs 识别为 text/plain，浏览器会拒绝加载 ONNX Runtime。
+mimetypes.add_type('application/javascript', '.mjs', strict=True)
 
 
 # Quick-start development settings - unsuitable for production
