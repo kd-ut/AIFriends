@@ -10,8 +10,9 @@
 
 import axios from "axios"
 import {useUserStore} from "@/stores/user.js";
+import CONFIG_API from "@/js/config/config.js";
 
-const BASE_URL = 'http://127.0.0.1:8000'
+const BASE_URL = CONFIG_API.HTTP_URL
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -90,4 +91,3 @@ api.interceptors.response.use(
 )
 
 export default api
-

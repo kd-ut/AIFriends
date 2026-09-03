@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 from pathlib import Path
 import mimetypes
+import os
 
 from dotenv import load_dotenv
 
@@ -27,12 +28,18 @@ mimetypes.add_type('application/javascript', '.mjs', strict=True)
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+pz1vfi_e=#@flz_mo0()z@i-85w*gb(1&tdr8di9^h2pj^dpy'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-local-development-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG', 'true').lower() in {'1', 'true', 'yes'}
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'app8137.acapp.acwing.com.cn',
+]
+CSRF_TRUSTED_ORIGINS = ['https://app8137.acapp.acwing.com.cn']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -126,17 +133,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 # 设置static和media静态文件路径
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+if not DEBUG:
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+else:
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
 # STATIC_ROOT = BASE_DIR / 'static'  # 生产阶段使用
-
-STATICFILES_DIRS = [  # 开发阶段使用，生产阶段需要注释掉
-    BASE_DIR / 'static',
-]
-
-MEDIA_URL = 'http://127.0.0.1:8000/media/'
+MEDIA_URL = 'http://127.0.0.1:8000/media/' if DEBUG else '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-
 
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
@@ -171,6 +177,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://app8137.acapp.acwing.com.cn",
 ]
 
 

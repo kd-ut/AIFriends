@@ -43,6 +43,7 @@ async function startRecording() {
       baseAssetPath: baseUrl,
       onnxWASMBasePath: baseUrl,
       onSpeechStart: () => {
+        if (isSpeaking.value) return
         isSpeaking.value = true
         statusText.value = '正在聆听…'
         emit('stop')
@@ -56,10 +57,13 @@ async function startRecording() {
         ort.env.wasm.numThreads = 1
         ort.env.logLevel = 'error'
       },
-      positiveSpeechThreshold: 0.8,
-      negativeSpeechThreshold: 0.65,
-      minSpeechFrames: 5,
-      redemptionFrames: 5,
+      // vad-web 0.0.30 uses millisecond options. Keep the end pause short so
+      // speech is submitted quickly, while retaining a little leading audio.
+      positiveSpeechThreshold: 0.55,
+      negativeSpeechThreshold: 0.35,
+      minSpeechMs: 200,
+      redemptionMs: 450,
+      preSpeechPadMs: 300,
     })
     await vadInstance.start()
     statusText.value = '语音输入'

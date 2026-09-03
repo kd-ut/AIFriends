@@ -1,8 +1,9 @@
 import {fetchEventSource} from '@microsoft/fetch-event-source';
 import {useUserStore} from "@/stores/user.js";
 import api from "./api.js";
+import CONFIG_API from "@/js/config/config.js";
 
-const BASE_URL = 'http://127.0.0.1:8000'
+const BASE_URL = CONFIG_API.HTTP_URL
 
 export default async function streamApi(url, options = {}) {
   const userStore = useUserStore()

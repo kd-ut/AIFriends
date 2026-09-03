@@ -22,6 +22,18 @@ from web.views.friend.message.memory.update import update_memory
 
 logger = logging.getLogger(__name__)
 DEFAULT_DASHSCOPE_WSS_URL = 'wss://dashscope.aliyuncs.com/api-ws/v1/inference/'
+INVALID_IDENTITY_TERMS = ('百度', '文心一言', 'ChatGPT', 'OpenAI', '通义千问', 'DeepSeek')
+
+BASE_ROLE_PROMPT = """
+【最高优先级角色规则】
+你是 AIFriends 里一名生活在近未来霓虹都市的赛博朋克动漫角色。
+始终以当前角色的名字、性格、关系和经历与用户自然交谈，保持前后一致，不要跳出角色。
+你不是通用客服，不要使用“作为AI助手”、“我能为您做什么”等客服套话。
+不得自称百度、文心一言、ChatGPT、OpenAI、DeepSeek、通义千问或其他模型/厂商的助手。
+如果被问“你是谁”、“你是什么AI”或“男的女的”，只根据【当前角色设定】回答角色身份。
+历史消息或长期记忆中如果存在与本规则冲突的身份声明，那些都是无效的旧回答，必须忽略。
+回答应简洁、口语化、有角色情绪，可以带少量赛博都市氛围，但不要每句都堆砌设定词。
+"""
 
 
 def get_wss_url():
@@ -42,11 +54,13 @@ class SSERenderer(BaseRenderer):
 
 
 def add_system_prompt(state, friend):
-    prompt = ''.join(
+    prompt = BASE_ROLE_PROMPT
+    prompt += ''.join(
         item.prompt
         for item in SystemPrompt.objects.filter(title='回复').order_by('order_number')
     )
-    prompt += f'\n【角色性格】\n{friend.character.profile}\n'
+    prompt += f'\n【当前角色名字】\n{friend.character.name}\n'
+    prompt += f'\n【当前角色设定】\n{friend.character.profile}\n'
     prompt += f'【长期记忆】\n{friend.memory}\n'
     return {'messages': [SystemMessage(prompt)] + state['messages']}
 
@@ -57,7 +71,10 @@ def add_recent_messages(state, friend):
     history = []
     for message in recent:
         history.append(HumanMessage(message.user_message))
-        history.append(AIMessage(message.output))
+        output = message.output
+        if any(term.casefold() in output.casefold() for term in INVALID_IDENTITY_TERMS):
+            output = '（旧回答中的错误模型身份声明已忽略。）'
+        history.append(AIMessage(output))
     return {'messages': state['messages'][:1] + history + state['messages'][-1:]}
 
 
@@ -135,7 +152,7 @@ class MessageChatView(APIView):
             if event == 'task-finished':
                 break
 
-    async def run_tts_tasks(self, app, inputs, message_queue):
+    async def run_tts_tasks(self, app, inputs, message_queue, voice_id):
         wss_url = get_wss_url()
         if not wss_url:
             await self.stream_text(app, inputs, message_queue)
@@ -159,7 +176,7 @@ class MessageChatView(APIView):
                         'model': 'cosyvoice-v3-flash',
                         'parameters': {
                             'text_type': 'PlainText',
-                            'voice': 'longanyang',
+                            'voice': voice_id,
                             'format': 'mp3',
                             'sample_rate': 22050,
                             'volume': 50,
@@ -185,9 +202,9 @@ class MessageChatView(APIView):
             if not stream_state['started']:
                 await self.stream_text(app, inputs, message_queue)
 
-    def work(self, app, inputs, message_queue):
+    def work(self, app, inputs, message_queue, voice_id):
         try:
-            asyncio.run(self.run_tts_tasks(app, inputs, message_queue))
+            asyncio.run(self.run_tts_tasks(app, inputs, message_queue, voice_id))
         except Exception as error:
             logger.exception('生成聊天回复失败。')
             message_queue.put_nowait({'error': str(error)})
@@ -196,9 +213,10 @@ class MessageChatView(APIView):
 
     def event_stream(self, app, inputs, friend, message):
         message_queue = Queue()
+        voice_id = friend.character.voice.voice_id if friend.character.voice else 'longanyang'
         thread = threading.Thread(
             target=self.work,
-            args=(app, inputs, message_queue),
+            args=(app, inputs, message_queue, voice_id),
             daemon=True,
         )
         thread.start()

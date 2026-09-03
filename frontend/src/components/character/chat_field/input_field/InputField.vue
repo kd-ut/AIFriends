@@ -122,6 +122,11 @@ async function handleSend(event, audioMessage) {
   const content = (audioMessage || message.value).trim()
   if (!content) return
 
+  // Text submission is also a user gesture. Unlock playback here so replies
+  // sent with Enter/the send button can autoplay just like microphone input.
+  if (event?.isTrusted && !audioMessage) {
+    audioUnlockPromise = unlockAudio()
+  }
   await audioUnlockPromise
   const currentId = ++processId
   message.value = ''

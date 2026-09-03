@@ -1,0 +1,16 @@
+[Unit]
+Description=AIFriends Django service
+After=network.target
+
+[Service]
+Type=simple
+User=acs
+Group=acs
+WorkingDirectory=/home/acs/AIFriends/backend
+EnvironmentFile=/home/acs/AIFriends/backend/.env
+ExecStart=/home/acs/AIFriends/.venv/bin/gunicorn --workers 2 --timeout 180 --bind 127.0.0.1:8000 backend.wsgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
